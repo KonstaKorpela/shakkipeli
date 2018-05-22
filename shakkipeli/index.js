@@ -12,15 +12,16 @@ const http = require('http').Server(app);
 const fs = require('fs');
 const mysql = require('mysql');
 
-// const Chessboard = require('./luokat/chessboard');
+const Chessboard = require('./luokat/chessboard');
+
 const portti = process.env.PORT || 3000;
 const host = '127.0.0.1';
 
 const io = require('socket.io')(http);
 
-const Peli = require('./luokat/peli');
-const pelit = new Map();
-const Pelaaja = require('./luokat/pelaaja');
+// const Peli = require('./luokat/peli');
+// const pelit = new Map();
+// const Pelaaja = require('./luokat/pelaaja');
 
 const SQL = require('./Sql');
 const SqlLauseet = new SQL;
@@ -33,8 +34,11 @@ const haeKayttajaID = "SELECT userID FROM user WHERE UserName = ?";
 const haeGameID = "SELECT gameID FROM game WHERE white = ?";
 const tarkistaTunnukset = "SELECT COUNT(CASE WHEN UserName = ? THEN 1 END) AS uStatus, COUNT(CASE WHEN EmailAddress=? THEN 1 END) AS eStatus FROM user";
 const haeShakkitaulu = "SELECT shakkitaulu FROM game WHERE gameID=?"
+const paivitaShakkitaulu = "UPDATE game SET shakkitaulu = ? WHERE gameID = ?";
 
 const ejs = require('ejs');
+
+const chessboard = new Chessboard();
 
 function jsonPromise(data) {
   return new Promise((resolve, reject) => {
@@ -42,7 +46,7 @@ function jsonPromise(data) {
       let muunnettu = JSON.parse(data);
       resolve(muunnettu);
     } catch (error) {
-      reject('ei muunnettu: ' + error.message);
+      reject('ei muunnettu: ' + error);
     }
   });
 }
@@ -120,6 +124,10 @@ app.post('/uusipeli', (req, res) => {
 
 });
 
+app.get('/pelihuone', (req, res) => {
+
+});
+
 
 app.get('/logout', (req, res) => {
 
@@ -164,30 +172,27 @@ app.get('/monitori', (req, res) =>
   res.sendFile(path.join(__dirname, 'monitori.html'))
 );
 
-io.on('connection', socket => { //Connect to the server
-  // if (peliNumero > 0) {
-  //   for (let i = 1; i <= peliNumero; i++) {
-  //     socket.emit('luotuPeli', i);
-  //   }
-  // }
+io.on('connection', socket => {
 
-  socket.on('liityPeliin', (liityNumero, nimi) => {
-    socket.nimi = nimi;
-    socket.numero = liityNumero;
-    if (!pelit.get(+liityNumero).taynna()) {
-      pelit.get(+liityNumero).lisaa(new Pelaaja(socket.nimi, socket.id));
-      socket.emit('liittynyt');
-      console.log(pelit.get(+liityNumero).pelaajat[0]);
-      io.to(pelit.get(+liityNumero).pelaajat[0].id).emit('liittynyt');
-    } else {
-      socket.emit('pelitaynna');
-    }
-  });
+  // socket.on('liityPeliin', (liityNumero, nimi) => {
+  //   socket.nimi = nimi;
+  //   socket.numero = liityNumero;
+  //   if (!pelit.get(+liityNumero).taynna()) {
+  //     pelit.get(+liityNumero).lisaa(new Pelaaja(socket.nimi, socket.id));
+  //     socket.emit('liittynyt');
+  //     console.log(pelit.get(+liityNumero).pelaajat[0]);
+  //     io.to(pelit.get(+liityNumero).pelaajat[0].id).emit('liittynyt');
+  //   } else {
+  //     socket.emit('pelitaynna');
+  //   }
+  // });
 
   socket.on('peliLuotu', (username, gameID) => {
+    console.log(socket.id);
     SqlLauseet.suoritaKysely(haeShakkitaulu, gameID)
       .then(taulu => jsonPromise(taulu[0].shakkitaulu))
-      .then(shakkitaulu => socket.emit('alustaTaulu', shakkitaulu))
+      .then(shakkitaulu => io.emit('alustaTaulu', shakkitaulu))
+      .then(console.log(socket.id))
       .catch(err => console.log('Virhe: ' + err.message));
   });
 
@@ -195,32 +200,36 @@ io.on('connection', socket => { //Connect to the server
     io.emit('uusiViesti', `${viesti}`)
   );
 
-  // socket.on('disconnect', () => { //When you refresh or disconnect
-  //   if (pelit.size !== 0) {
-  //     if (pelit.get(+socket.numero).omistaja === socket.id || pelit.get(+socket.numero).pelaajat[1].id === socket.id) {
-  //       io.to(pelit.get(+socket.numero).pelaajat[0].id).emit('disconnected');
-  //       io.to(pelit.get(+socket.numero).pelaajat[1].id).emit('disconnected');
-  //       pelit.delete(+socket.numero);
-  //     }
-  //   }
-  // });
-
-  socket.on('alkuruutu', (data, username) => {
-    // if (SqlLauseet.
-    //   pelit.get(+socket.numero).chessboard.onTyhja(data) === false) {
-    //   alkuruutu = data;
-    // } else { //If the turn is *not* equal your color send a message saying it's not your turn
-    //   io.send('Ei ole sinun vuoro.');
-    // }
+  socket.on('alkuruutu', (data, gameID) => {
+    SqlLauseet.suoritaKysely(haeShakkitaulu, gameID)
+      .then(result => jsonPromise(result[0].shakkitaulu))
+      .then(taulu => {
+        chessboard.alusta(taulu);
+        if (chessboard.onTyhja(data) === false) {
+          alkuruutu = data;
+        } else {
+          io.send('Ei ole sinun vuoro.');
+        }
+      })
+      .catch(err => console.log('Alkuruutu virhe: ' + err))
   });
 
-  socket.on('loppuruutu', data => { //When you click the ending square
-    if (pelit.get(+socket.numero).chessboard.siirra(alkuruutu, data)) { //If the move is legal
-      io.emit('laillinenSiirto', 'Siirto onnistui', pelit.get(+socket.numero).chessboard.chessboard, pelit.get(+socket.numero).chessboard.bsyodyt);
-    } else { //Else the move is illegal
-      io.emit('laitonSiirto', 'Laiton siirto', pelit.get(+socket.numero).chessboard.chessboard);
+  socket.on('loppuruutu', (loppuruutu, gameID) => {
+    if (chessboard.siirra(alkuruutu, loppuruutu)) {
+      SqlLauseet.suoritaKysely(paivitaShakkitaulu, JSON.stringify(chessboard.returnTaulu()), gameID)
+        .then(result => console.log('Päivitetty taulu: ' +result.affectedRows))
+        .catch(err => console.log('paivitaTaulu error: ' + err));
+      io.emit('laillinenSiirto', 'Legal move', chessboard.returnTaulu());
+    } else {
+      io.emit('laitonSiirto', 'Illegal move', chessboard.returnTaulu());
+      console.log('Laiton siirto');
     }
   });
+
+  socket.on('disconnect', function(){
+
+  });
+
 });
 http.listen(portti, host, () =>
   // eslint-disable no-console

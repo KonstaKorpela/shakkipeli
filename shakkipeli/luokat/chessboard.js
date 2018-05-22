@@ -1,45 +1,42 @@
 'use strict';
 
+let siirtoLaillinen = false;
+
 module.exports = class Chessboard {
   constructor() {
-    this.chessboard = [
-      ['wRook', 'wKnight', 'wBishop', 'wKing', 'wQueen', 'wBishop', 'wKnight', 'wRook'],
-      ['wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn'],
-      ['bRook', 'bKnight', 'bBishop', 'bKing', 'bQueen', 'bBishop', 'bKnight', 'bRook']
-    ];
+    this.chessboard;
     this.wsyodyt = [];
     this.bsyodyt = [];
   }
 
-  siirra(alkuruutu, loppuruutu) { //alkuruutu = starting position & loppuruutu = ending position
+  alusta(chessboard){
+    this.chessboard = chessboard;
+  }
+
+  siirra(alkuruutu, loppuruutu) {
     let alkusolu = this.chessboard[alkuruutu.rivi][alkuruutu.sarake];
     let loppusolu = this.chessboard[loppuruutu.rivi][loppuruutu.sarake];
-    let alkurivi = alkuruutu.rivi //this.chessboard[alkuruutu.rivi];
-    let loppurivi = loppuruutu.rivi //this.chessboard[loppuruutu.rivi];
-    let alkusarake = alkuruutu.sarake //this.chessboard[alkuruutu.sarake];
-    let loppusarake = loppuruutu.sarake //this.chessboard[loppuruutu.sarake];
-    let siirtoLaillinen = false;
+    let alkurivi = alkuruutu.rivi;
+    let loppurivi = loppuruutu.rivi;
+    let alkusarake = alkuruutu.sarake;
+    let loppusarake = loppuruutu.sarake;
     let rivikerroin;
     let sarakekerroin;
-    let kirjain = loppusolu.charAt(0);
-    let akirjain = alkusolu.charAt(0);
-    let testi = true;
+    let kirjain = this.chessboard[loppuruutu.rivi][loppuruutu.sarake].charAt(0);
+    let akirjain = this.chessboard[alkuruutu.rivi][alkuruutu.sarake].charAt(0);
     let syontiLaillinen = false;
 
     if (alkusolu === 'tyhja') {
       siirtoLaillinen = false;
     } else if (alkusarake === loppusarake && alkurivi === loppurivi) {
       siirtoLaillinen = false;
-    } else if (akirjain === 'b' && kirjain === 'b') {
+    }
+    else if (akirjain === 'b' && kirjain === 'b') {
       siirtoLaillinen = false;
     } else if (akirjain === 'w' && kirjain === 'w') {
       siirtoLaillinen = false;
-    } else if (testi) {
+    }
+    else if (true) {
       switch (alkusolu) {
         case 'wKnight':
         case 'bKnight':
@@ -282,7 +279,8 @@ module.exports = class Chessboard {
 
       }
     }
-    console.log(this.bsyodyt, this.wsyodyt);
+
+
     if (siirtoLaillinen) {
       this.chessboard[loppuruutu.rivi][loppuruutu.sarake] = this.chessboard[alkuruutu.rivi][alkuruutu.sarake];
       this.chessboard[alkuruutu.rivi][alkuruutu.sarake] = 'tyhja';
@@ -292,18 +290,12 @@ module.exports = class Chessboard {
     }
   }
 
-  resetTaulu() {
-    this.chessboard = [
-      ['wRook', 'wKnight', 'wBishop', 'wKing', 'wQueen', 'wBishop', 'wKnight', 'wRook'],
-      ['wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn', 'wPawn'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja', 'tyhja'],
-      ['bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn', 'bPawn'],
-      ['bRook', 'bKnight', 'bBishop', 'bKing', 'bQueen', 'bBishop', 'bKnight', 'bRook']
-    ];
+  returnTaulu(){
+    if(siirtoLaillinen){
+      return this.chessboard;
+    }
   }
+
   onTyhja(ruutu) {
     return this.chessboard[ruutu.rivi][ruutu.sarake] === 'tyhja';
   }

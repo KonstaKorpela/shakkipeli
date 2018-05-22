@@ -14,13 +14,13 @@
   let viestilista;
   let voiLahettaa = false;
   let li = document.createElement('li');
-  // let shakkitaulu;
   let syodytPalat;
 
   document.addEventListener('DOMContentLoaded', lataaKuvat);
   socket = io();
 
   function alusta() {
+    console.log(socket.id);
     nimi = document.getElementById('nimi');
     viestilista = document.getElementById('errorlista');
     canvas = document.getElementById('canvas');
@@ -28,27 +28,26 @@
     canvas.addEventListener('click', ruudunValinta);
     draw();
     console.log('alustettu');
-    socket.on('alustaTaulu', function(shakkitaulu){
-      console.log('alusta taulu: ' + shakkitaulu);
+    socket.on('alustaTaulu', shakkitaulu => {
+      console.log('Taulu alustettu: ' + shakkitaulu);
       piirraKuvat(shakkitaulu);
     });
     // piirraKuvat();
 
-    socket.on('laitonSiirto', (viesti, data) => {
+    socket.on('laitonSiirto', (viesti, taulu) => {
       li.textContent = 'LAITON SIIRTO!';
       li.style.color = 'red';
       viestilista.appendChild(li);
       draw();
-      // piirraKuvat(data);
+      piirraKuvat(taulu);
     });
 
-    socket.on('laillinenSiirto', (viesti, data, syodyt) => {
+    socket.on('laillinenSiirto', (viesti, taulu) => {
       li.textContent = 'Laillinen siirto';
       li.style.color = 'blue';
       viestilista.appendChild(li);
       draw();
-      // piirraKuvat(data);
-      syodytPalaset(syodyt);
+      piirraKuvat(taulu);
     });
 
     socket.on('message', viesti => {
@@ -98,24 +97,24 @@
   }
 
   function ruudunValinta(e) {
-    if (alkuruutu === true) {
+    if (alkuruutu) {
       let paikka = hiirenPaikka(canvas, e);
-      socket.emit('alkuruutu', paikka);
+      socket.emit('alkuruutu', paikka, gameID);
       ctx.fillStyle = 'rgba(0, 115, 255, 0.35)';
       ctx.fillRect(paikka.sarake * 60, paikka.rivi * 60, 60, 60);
       alkuruutu = false;
     } else {
-      socket.emit('loppuruutu', hiirenPaikka(canvas, e));
+      socket.emit('loppuruutu', hiirenPaikka(canvas, e), gameID);
       alkuruutu = true;
     }
   }
 
-  function syodytPalaset(syodytPalat) {
-    for (let i = 0; i < syodytPalat.length; i++) {
-      console.log(syodytPalat);
-      ctx.drawImage(kuvat[syodytPalat[i]], 1000, 1000, 80, 80);
-    }
-  }
+  // function syodytPalaset(syodytPalat) {
+  //   for (let i = 0; i < syodytPalat.length; i++) {
+  //     console.log(syodytPalat);
+  //     ctx.drawImage(kuvat[syodytPalat[i]], 1000, 1000, 80, 80);
+  //   }
+  // }
 
   function piirraKuvat(shakkilauta) {
     for (let i = 0; i < shakkilauta.length; i++) {
@@ -144,8 +143,6 @@
     console.log("Keskustelu alustettu");
     document.getElementById('laheta').addEventListener('click', lahetaViesti);
   }
-
-
 
   socket.on('uusiViesti', data => {
     let li = document.createElement('li');
