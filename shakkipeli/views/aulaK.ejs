@@ -1,0 +1,24 @@
+<div id="header">
+<div id="kayttajanLista">
+  <p id="kayttajanNimi"><%= nimi %></p>
+</div>
+</div>
+<div id="header">
+  <a id="etusivu" href="localhost:3000">Etusivu</a>
+  <div class="dropdown-wrapper">
+    <div class="dropdown">
+      <a class="dropbtn"><%= nimi %></a>
+      <div class="dropdown-content">
+        <a href="/settings">Settings</a>
+        <a href="/logout">Logout</a>
+      </div>
+    </div>
+  </div>
+</div>
+<form class="teePeli" action="uusipeli" method="post">
+  <input hidden type="text" name="username" value="<%= nimi %>">
+  <input type="submit" value="Uusi peli">
+</form>
+<ul id="pelitlista">
+  Lista peleistä:
+</ul>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title></title>
+</head>
+<style media="screen">
+  #registerBtn{
+     background:none!important;
+     color:inherit;
+     border:none;
+     padding:0!important;
+     font: inherit;
+     /*border is optional*/
+     border-bottom:1px solid #444;
+     cursor: pointer;
+  }
+</style>
+<body>
+  <h1>Login</h1>
+  <h3>Syötä tiedot: </h3>
+  <form id="login" action="/login" method="post">
+    <p>
+      <label>
+           Nimi: <input type="text" name="username" size="10" value="konsta" required>
+        </label>
+    </p>
+    <p>
+      <label>
+        Salasana: <input type="password" name="password" size="15" value="salasana" required>
+      </label>
+    </p>
+    <input type="submit" value="Kirjaudu">
+  </form><br>
+    <a>Ei käyttäjää?</a><a href="/register"> Tee käyttäjä</a>
+  <p><%= virhe %></p>
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <script src='https://www.google.com/recaptcha/api.js'></script>
+</head>
+<style media="screen">
+  input {
+    margin: 5px;
+  }
+</style>
+
+<body>
+  <h2>Rekistöröinti</h2>
+  <form action="/register" method="post">
+     Email: <input type="text" name="email" required><br>
+     Firstname: <input type="text" name="firstname" required><br>
+     Lastname: <input type="text" name="lastname"><br>
+     Username: <input type="text" name="username" required><br>
+     Password: <input type="password" name="password" require>
+    <div class="g-recaptcha" data-sitekey="6Ld-OlIUAAAAAFqlTPEVz0N3qU4BgfKu7xgTqxwW"></div>
+    <input type="submit" value="Tee käyttäjä">
+  </form>
+    <p><%= virhe %> </p>
+</body>
+
+</html>
