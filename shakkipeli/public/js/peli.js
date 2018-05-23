@@ -19,20 +19,25 @@
   document.addEventListener('DOMContentLoaded', lataaKuvat);
   socket = io();
 
+  socket.on('connect', () => {
+    socket.emit('socketID', socket.io.engine.id);
+  });
+
   function alusta() {
-    console.log(socket.id);
     nimi = document.getElementById('nimi');
     viestilista = document.getElementById('errorlista');
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     canvas.addEventListener('click', ruudunValinta);
     draw();
+    console.log(socket.id);
     console.log('alustettu');
+    // piirraKuvat();
+
     socket.on('alustaTaulu', shakkitaulu => {
       console.log('Taulu alustettu: ' + shakkitaulu);
       piirraKuvat(shakkitaulu);
     });
-    // piirraKuvat();
 
     socket.on('laitonSiirto', (viesti, taulu) => {
       li.textContent = 'LAITON SIIRTO!';
@@ -150,6 +155,7 @@
     li.style.color = 'darkblue';
     viestilista.appendChild(li);
   });
+
 
   function lahetaViesti() {
     socket.emit('lahetaViesti', document.getElementById('viesti').value);

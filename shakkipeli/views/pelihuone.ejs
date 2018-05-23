@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/tyylit/tyylit.css">
   <script src="./js/peli.js" charset="utf-8"></script>
 </head>
+
 <body>
   <%- include('shakkilauta') -%>
     <%- include('chat') -%>
@@ -16,7 +17,9 @@
         <script>
           let socket = io();
           let gameID = '<%= gameID %>';
-          console.log(gameID);
+          socket.on('socketID', data => {
+            socketID = data;
+          });
           socket.emit('peliLuotu', '<%= username %>', '<%= gameID %>');
         </script>
         <%  } %>

@@ -9,7 +9,7 @@ module.exports = class Chessboard {
     this.bsyodyt = [];
   }
 
-  alusta(chessboard){
+  alusta(chessboard) {
     this.chessboard = chessboard;
   }
 
@@ -30,13 +30,11 @@ module.exports = class Chessboard {
       siirtoLaillinen = false;
     } else if (alkusarake === loppusarake && alkurivi === loppurivi) {
       siirtoLaillinen = false;
-    }
-    else if (akirjain === 'b' && kirjain === 'b') {
+    } else if (akirjain === 'b' && kirjain === 'b') {
       siirtoLaillinen = false;
     } else if (akirjain === 'w' && kirjain === 'w') {
       siirtoLaillinen = false;
-    }
-    else if (true) {
+    } else if (true) {
       switch (alkusolu) {
         case 'wKnight':
         case 'bKnight':
@@ -290,10 +288,8 @@ module.exports = class Chessboard {
     }
   }
 
-  returnTaulu(){
-    if(siirtoLaillinen){
-      return this.chessboard;
-    }
+  returnTaulu() {
+    return this.chessboard;
   }
 
   onTyhja(ruutu) {

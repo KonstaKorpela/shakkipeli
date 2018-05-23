@@ -1,7 +1,7 @@
 //SHAKKI SERVERI
 'use strict';
 let alkuruutu;
-let peliNumero = 0;
+let pelisocketID;
 
 const bodyparser = require('body-parser');
 const sessio = require('express-session');
@@ -187,13 +187,16 @@ io.on('connection', socket => {
   //   }
   // });
 
+  socket.on('socketID', socketID => {
+    pelisocketID = socketID;
+  });
+
   socket.on('peliLuotu', (username, gameID) => {
-    console.log(socket.id);
+    console.log(pelisocketID);
     SqlLauseet.suoritaKysely(haeShakkitaulu, gameID)
       .then(taulu => jsonPromise(taulu[0].shakkitaulu))
-      .then(shakkitaulu => io.emit('alustaTaulu', shakkitaulu))
-      .then(console.log(socket.id))
-      .catch(err => console.log('Virhe: ' + err.message));
+      .then(shakkitaulu => socket.broadcast.to(pelisocketID).emit('alustaTaulu', shakkitaulu))
+      .catch(err => console.log('Virhe: ' + err.message))
   });
 
   socket.on('lahetaViesti', viesti =>
@@ -217,16 +220,16 @@ io.on('connection', socket => {
   socket.on('loppuruutu', (loppuruutu, gameID) => {
     if (chessboard.siirra(alkuruutu, loppuruutu)) {
       SqlLauseet.suoritaKysely(paivitaShakkitaulu, JSON.stringify(chessboard.returnTaulu()), gameID)
-        .then(result => console.log('Päivitetty taulu: ' +result.affectedRows))
+        .then(result => console.log('Päivitetty taulu: ' + result.affectedRows))
         .catch(err => console.log('paivitaTaulu error: ' + err));
       io.emit('laillinenSiirto', 'Legal move', chessboard.returnTaulu());
     } else {
       io.emit('laitonSiirto', 'Illegal move', chessboard.returnTaulu());
-      console.log('Laiton siirto');
+      console.log(chessboard.returnTaulu());
     }
   });
 
-  socket.on('disconnect', function(){
+  socket.on('disconnect', function() {
 
   });
 
