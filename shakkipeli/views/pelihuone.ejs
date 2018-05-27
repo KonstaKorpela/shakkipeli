@@ -11,18 +11,15 @@
 </head>
 
 <body>
-  <%- include('shakkilauta') -%>
+    <%- include('shakkilauta') -%>
     <%- include('chat') -%>
-      <% if(status === 200) { %>
-        <script>
-          let socket = io();
-          let gameID = '<%= gameID %>';
-          socket.on('socketID', data => {
-            socketID = data;
-          });
-          socket.emit('peliLuotu', '<%= username %>', '<%= gameID %>');
-        </script>
-        <%  } %>
+      <script>
+        let socket = io();
+        let gameID = '<%= gameID %>';
+        let status = '<%= status %>';
+        socket.emit('peliLuotu', '<%= username %>', '<%= gameID %>');
+      </script>
+
 </body>
 
 </html>

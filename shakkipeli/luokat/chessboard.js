@@ -11,6 +11,7 @@ module.exports = class Chessboard {
 
   alusta(chessboard) {
     this.chessboard = chessboard;
+    return this.chessboard;
   }
 
   siirra(alkuruutu, loppuruutu) {
@@ -289,7 +290,11 @@ module.exports = class Chessboard {
   }
 
   returnTaulu() {
-    return this.chessboard;
+    if (this.chessboard) {
+      return this.chessboard;
+    } else {
+      console.log('Taulu on tyhjä');
+    }
   }
 
   onTyhja(ruutu) {

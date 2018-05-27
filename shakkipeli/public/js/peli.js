@@ -15,12 +15,18 @@
   let voiLahettaa = false;
   let li = document.createElement('li');
   let syodytPalat;
+  let taulu;
 
   document.addEventListener('DOMContentLoaded', lataaKuvat);
   socket = io();
 
   socket.on('connect', () => {
-    socket.emit('socketID', socket.io.engine.id);
+    socket.emit('alustaTiedot', socket.io.engine.id, gameID, status);
+  });
+
+  socket.on('alustaTaulu', shakkitaulu => {
+    // console.log('Taulu alustettu: ' + shakkitaulu);
+    taulu = shakkitaulu;
   });
 
   function alusta() {
@@ -30,14 +36,8 @@
     ctx = canvas.getContext('2d');
     canvas.addEventListener('click', ruudunValinta);
     draw();
-    console.log(socket.id);
     console.log('alustettu');
-    // piirraKuvat();
-
-    socket.on('alustaTaulu', shakkitaulu => {
-      console.log('Taulu alustettu: ' + shakkitaulu);
-      piirraKuvat(shakkitaulu);
-    });
+    piirraKuvat(taulu);
 
     socket.on('laitonSiirto', (viesti, taulu) => {
       li.textContent = 'LAITON SIIRTO!';
